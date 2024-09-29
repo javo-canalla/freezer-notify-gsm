@@ -138,11 +138,6 @@ void setup() {
   mensaje_sms();
   delay_wdt(1000);  
   Serial.println("fin de setup");
-
-//	while(1){
-//		Serial.println("colgado!!!");
-//		Serial.println("esperando wdt...");
-//	} 
 }
 
 void loop() {
@@ -150,11 +145,6 @@ void loop() {
 
   // Leo entrada 1
   leer_entrada(digitalRead(ent1), &estado1, outMessage1F, outMessage1OK, destinationNumber1);
-
-  //	while(1){
-  //		Serial.println("colgado!!!");
-  //		Serial.println("esperando wdt...");
-  //	}
 
   // Leo entrada 2
   leer_entrada(digitalRead(ent2), &estado2, outMessage2F, outMessage2OK, destinationNumber2);
@@ -213,17 +203,14 @@ void delay_wdt(unsigned long t) {
 
 // función de chequeo de estado del sim900 (on/off)
 bool sim900_onoff_check() {
-  for (int B = 0; B <= 499; B++) { NETLIGHT = NETLIGHT + analogRead(LED); }
-  NETLIGHT = NETLIGHT / 500;
-  NETLIGHT = NETLIGHT * 1 * 5 / 1024;                                                   // Convertir a voltios
-  Serial.print("Voltaje de NETLIGHT: ");
-  Serial.println(NETLIGHT);
-  if (NETLIGHT > 1.75) {
-    Serial.println("sim900 encendido!");
-    return HIGH;
+  delay_wdt(5000);
+  while ( SIM900.available() > 0 ) SIM900.read();       // Limpia el buffer de entrada
+  SIM900.println( "AT + CSQ" );                         // Comando AT para saber el nivel de señal
+  delay_wdt(1000);
+  if (SIM900.available() > 0) {                         // Cargo todos los caracteres en el string p
+    return HIGH;    
   }
   else {
-    Serial.println("sim900 apagado!");
     return LOW;
   }
 }
