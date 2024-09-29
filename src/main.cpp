@@ -164,10 +164,7 @@ void loop() {
   // leo el estado de la bateria
   leer_entrada(battery_check(), &estadoBAT, outMessageBAT, outMessageFUN, destinationNumber7);
 
-  nivelsenial();
-  sim900_onoff_check();
   delay_wdt(5000);
-
   Serial.println("fin loop");
 }
 
@@ -268,7 +265,14 @@ bool battery_check() {
 
 // Funcion para mandar mensaje de texto
 void mensaje_sms() {
-  nivelsenial();                                                  // Verifico si hay señal, si hay continuo si no reenciendo el SIM900
+  do {
+    nivelsenial();                                                // Verifico si hay señal, si hay continuo si no reenciendo el SIM900
+    delay_wdt(5000);
+    if (senialf <= 5) {
+      sim900_reset(); 
+    }
+    Serial.print("Buscando valores aceptables de señal...");
+  } while (senialf <= 5);
   delay_wdt(1000);
   SIM900.print("AT+CMGF=1\r");			                              // AT command to send SMS message
   delay_wdt(1000);
@@ -314,14 +318,9 @@ void nivelsenial() {
     delay_wdt(100);
     Serial.print("Contenido de p: ");
     Serial.println(p); 
-    if(senialf <= 5) {
-      delay_wdt(5000);
-      sim900_reset();  
-    }
   }
   else {
     Serial.println("sim900 no respondió!");
-    sim900_reset();
   }
 }
 
