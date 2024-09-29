@@ -1,7 +1,7 @@
 // Declaración de librerías
 #include <Arduino.h>
 #include <avr/wdt.h>
-#include <SoftwareSerial.h>;
+#include <SoftwareSerial.h>
 
 
 // definiciones de variables y constantes
@@ -50,21 +50,21 @@ unsigned char BAT = A1;             // pin A1
 String outMessage = "";
 String outMessageF = "";
 String outMessageOK = "";
-String outMessage1F = "Falla freezer 1";		// variable que guarda los caracteres que envia el SIM GSM de falla del freezer 1
-String outMessage1OK = "Freezer 1 ok";			// variable que guarda los caracteres que envia el SIM GSM indicando que el freezer 1 se encuenta ok
-String outMessage2F = "Falla freezer 2";		// variable que guarda los caracteres que envia el SIM GSM de falla del freezer 2
-String outMessage2OK = "Freezer 2 ok";			// variable que guarda los caracteres que envia el SIM GSM indicando que el freezer 2 se encuenta ok
-String outMessage3F = "Falla freezer 3";		// variable que guarda los caracteres que envia el SIM GSM de falla del freezer 3
-String outMessage3OK = "Freezer 3 ok";			// variable que guarda los caracteres que envia el SIM GSM indicando que el freezer 3 se encuenta ok
-String outMessage4F = "Falla freezer 4";		// variable que guarda los caracteres que envia el SIM GSM de falla del freezer 4
-String outMessage4OK = "Freezer 4 ok";			// variable que guarda los caracteres que envia el SIM GSM indicando que el freezer 4 se encuenta ok
-String outMessage5F = "Falla freezer 5";		// variable que guarda los caracteres que envia el SIM GSM de falla del freezer 5
-String outMessage5OK = "Freezer 5 ok";			// variable que guarda los caracteres que envia el SIM GSM indicando que el freezer 5 se encuenta ok
-String outMessage6F = "Falla freezer 6";		// variable que guarda los caracteres que envia el SIM GSM de falla del freezer 6
-String outMessage6OK = "Freezer 6 ok";			// variable que guarda los caracteres que envia el SIM GSM indicando que el freezer 6 se encuenta ok
-String outMessageOFF = "Sin energia";	  		// variable que guarda los caracteres que envia el SIM GSM indicando que se corto la energia
-String outMessageBAT = "BATERIA BAJA";			// variable que guarda los caracteres que envia el SIM GSM indicando  bateria baja
-String outMessageFUN = "FUNCIONANDO";		  	// variable que indica que el equipo funciona en forma correcta
+String outMessage1F = "Falla freezer 1";		              // variable que guarda los caracteres que envia el SIM GSM de falla del freezer 1
+String outMessage1OK = "Freezer 1 ok";			              // variable que guarda los caracteres que envia el SIM GSM indicando que el freezer 1 se encuenta ok
+String outMessage2F = "Falla freezer 2";		              // variable que guarda los caracteres que envia el SIM GSM de falla del freezer 2
+String outMessage2OK = "Freezer 2 ok";			              // variable que guarda los caracteres que envia el SIM GSM indicando que el freezer 2 se encuenta ok
+String outMessage3F = "Falla freezer 3";		              // variable que guarda los caracteres que envia el SIM GSM de falla del freezer 3
+String outMessage3OK = "Freezer 3 ok";			              // variable que guarda los caracteres que envia el SIM GSM indicando que el freezer 3 se encuenta ok
+String outMessage4F = "Falla freezer 4";		              // variable que guarda los caracteres que envia el SIM GSM de falla del freezer 4
+String outMessage4OK = "Freezer 4 ok";			              // variable que guarda los caracteres que envia el SIM GSM indicando que el freezer 4 se encuenta ok
+String outMessage5F = "Falla freezer 5";		              // variable que guarda los caracteres que envia el SIM GSM de falla del freezer 5
+String outMessage5OK = "Freezer 5 ok";			              // variable que guarda los caracteres que envia el SIM GSM indicando que el freezer 5 se encuenta ok
+String outMessage6F = "Falla freezer 6";		              // variable que guarda los caracteres que envia el SIM GSM de falla del freezer 6
+String outMessage6OK = "Freezer 6 ok";			              // variable que guarda los caracteres que envia el SIM GSM indicando que el freezer 6 se encuenta ok
+String outMessageOFF = "Sin energia";	  		              // variable que guarda los caracteres que envia el SIM GSM indicando que se corto la energia
+String outMessageBAT = "BATERIA BAJA";			              // variable que guarda los caracteres que envia el SIM GSM indicando  bateria baja
+String outMessageFUN = "Funcionamiento normal!!!";		  	// variable que indica que el equipo funciona en forma correcta
 
 // números de teléfonos de destino
 String destinationNumber = "";
@@ -84,7 +84,7 @@ unsigned long previousMillis_wdt = 0;		      // valor millis antes del último r
 // put function declarations here:
 void check_wdt();
 
-void delay_wdt(unsigned long t);
+void delay_wdt(unsigned long);
 
 bool sim900_onoff_check();
 
@@ -94,13 +94,15 @@ void sim900_reset();
 
 void onoff_signal();
 
-void battery_check();
+bool battery_check();
 
 void mensaje_sms();
 
 void nivelsenial();
 
 void analiza();
+
+void leer_entrada(char, unsigned char *, String, String, String);
 
 
 void setup() {
@@ -146,15 +148,8 @@ void setup() {
 void loop() {
   Serial.println("inicio loop");
 
-  // Leo entrada 1 
-  entrada = digitalRead (ent1);
-  delay_wdt(100);
-  estado = estado1;
-  outMessageF = outMessage1F;
-  outMessageOK = outMessage1OK;
-  destinationNumber=destinationNumber1;
-  analiza();
-  estado1 = estado;
+  // Leo entrada 1
+  leer_entrada(digitalRead(ent1), &estado1, outMessage1F, outMessage1OK, destinationNumber1);
 
   //	while(1){
   //		Serial.println("colgado!!!");
@@ -162,63 +157,22 @@ void loop() {
   //	}
 
   // Leo entrada 2
-  entrada = digitalRead (ent2);
-  delay_wdt(100);
-  estado = estado2;
-  outMessageF = outMessage2F;
-  outMessageOK = outMessage2OK;
-  destinationNumber = destinationNumber2;
-  analiza();
-  estado2 = estado;
+  leer_entrada(digitalRead(ent2), &estado2, outMessage2F, outMessage2OK, destinationNumber2);
 
   // Leo entrada 3
-  entrada = digitalRead (ent3);
-  delay_wdt(100);
-  estado = estado3;
-  outMessageF = outMessage3F;
-  outMessageOK = outMessage3OK;
-  destinationNumber = destinationNumber3;
-  analiza();
-  estado3 = estado;
+  leer_entrada(digitalRead(ent3), &estado3, outMessage3F, outMessage3OK, destinationNumber3);
 
   // Leo entrada 4
-  entrada = digitalRead (ent4);
-  delay_wdt(100);
-  estado = estado4;
-  outMessageF = outMessage4F;
-  outMessageOK = outMessage4OK;
-  destinationNumber = destinationNumber4;
-  analiza();
-  estado4 = estado;
+  leer_entrada(digitalRead(ent4), &estado4, outMessage4F, outMessage4OK, destinationNumber4);
 
   // Leo entrada 5
-  entrada = digitalRead (ent5);
-  delay_wdt(100);
-  estado = estado5;
-  outMessageF = outMessage5F;
-  outMessageOK = outMessage5OK;
-  destinationNumber = destinationNumber5;
-  analiza();
-  estado5 = estado;
+  leer_entrada(digitalRead(ent5), &estado5, outMessage5F, outMessage5OK, destinationNumber5);
 
   // Leo entrada 6
-  entrada = digitalRead (ent6);
-  delay_wdt(100);
-  estado = estado6;
-  outMessageF = outMessage6F;
-  outMessageOK = outMessage6OK;
-  destinationNumber = destinationNumber6;
-  analiza();
-  estado6 = estado;
+  leer_entrada(digitalRead(ent6), &estado6, outMessage6F, outMessage6OK, destinationNumber6);
 
   // leo el estado de la bateria
-  battery_check();
-  estado = estadoBAT;
-  outMessageF = outMessageBAT;
-  outMessageOK = outMessageBAT;
-  destinationNumber = destinationNumber6;
-  analiza();
-  estadoBAT = estado;
+  leer_entrada(battery_check(), &estadoBAT, outMessageBAT, outMessageFUN, destinationNumber7);
 
   nivelsenial();
   sim900_onoff_check();
@@ -261,10 +215,10 @@ void delay_wdt(unsigned long t) {
 bool sim900_onoff_check() {
   for (int B = 0; B <= 499; B++) { NETLIGHT = NETLIGHT + analogRead(LED); }
   NETLIGHT = NETLIGHT / 500;
-  NETLIGHT = NETLIGHT * 1 * 5 / 1024;                                                   //Convertir a voltios
+  NETLIGHT = NETLIGHT * 1 * 5 / 1024;                                                   // Convertir a voltios
   Serial.print("Voltaje de NETLIGHT: ");
   Serial.println(NETLIGHT);
-  if (NETLIGHT > 1.5) {
+  if (NETLIGHT > 1.75) {
     Serial.println("sim900 encendido!");
     return HIGH;
   }
@@ -308,7 +262,7 @@ void onoff_signal() {
 }
 
 // función que chequea la tensión de la batería
-void battery_check() {
+bool battery_check() {
   for (int B = 0; B <= 499; B++) {
 	  Vbat = Vbat + analogRead(BAT);
   }
@@ -317,11 +271,11 @@ void battery_check() {
   Serial.print("Votaje batería: ");
   Serial.println(Vbat);
   if(Vbat < 11) {
-  	entrada = true;
   	delay_wdt(100);
+    return true;
   }   
   else {
-	  entrada = false;
+	  return false;
   }
 }
 
@@ -386,19 +340,36 @@ void nivelsenial() {
 
 // Funcion que analiza si hay que mandar mensaje
 void analiza() {
-  if (entrada != estado) {
-    if (entrada == true) {
-      Serial.println(outMessageF);
-      outMessage = outMessageF;
-      mensaje_sms();
-      estado = entrada;
-    }
-    else {
+	if (entrada != estado)  {
+	  if (entrada == true){
+	   	Serial.println(outMessageF);
+		  Serial.println('\r');
+	  	outMessage = outMessageF;
+	   	mensaje_sms();
+	    estado = entrada;
+	  }
+	  else {
       Serial.println(outMessageOK);
+      Serial.println('\r');
       outMessage = outMessageOK;
       mensaje_sms();
       estado = entrada;
-    }
-  }
-  else {}  
+	  }        
+	}
+	else {
+      Serial.println("sin cambios, no se enviará ningún SMS");
+	}
+	check_wdt();
+}
+
+// función para leer las entradas
+void leer_entrada(char input, unsigned char *estadox, String outMessagexF, String outMessagexOK, String destinationNumberx) {
+  entrada = input;
+  delay_wdt(100);
+  estado = *estadox;
+  outMessageF = outMessagexF;
+  outMessageOK = outMessagexOK;
+  destinationNumber = destinationNumberx;
+  analiza();
+  *estadox = estado;
 }
